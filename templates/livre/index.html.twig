@@ -1,20 +1,156 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello LivreController!{% endblock %}
+{% block title %}Catalogue{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+  {# ── BARRE DE RECHERCHE ── #}
+  <div class="search-section">
+    <form method="get" action="{{ path('livre_index') }}">
+      <div class="search-bar">
+        <select name="type">
+          <option value="">Tout</option>
+          <option value="titre"  {{ app.request.get('type') == 'titre'  ? 'selected' : '' }}>Titre</option>
+          <option value="auteur" {{ app.request.get('type') == 'auteur' ? 'selected' : '' }}>Auteur</option>
+          <option value="genre"  {{ app.request.get('type') == 'genre'  ? 'selected' : '' }}>Genre</option>
+        </select>
+        <input
+          type="text"
+          name="q"
+          value="{{ app.request.get('q') }}"
+          placeholder="Rechercher un titre, un auteur, un genre…"
+        />
+        <button type="submit">🔍</button>
+      </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/maram/Desktop/bookshelf/src/Controller/LivreController.php</code></li>
-        <li>Your template at <code>/home/maram/Desktop/bookshelf/templates/livre/index.html.twig</code></li>
-    </ul>
-</div>
+      {# Filtres rapides #}
+      <div class="search-filters">
+        <a href="{{ path('livre_index') }}"
+           class="filter-chip {{ app.request.get('dispo') is null ? 'active' : '' }}">
+          Tous
+        </a>
+        <a href="{{ path('livre_index', {dispo: '1'}) }}"
+           class="filter-chip {{ app.request.get('dispo') == '1' ? 'active' : '' }}">
+          Disponible
+        </a>
+        <a href="{{ path('livre_index', {dispo: '0'}) }}"
+           class="filter-chip {{ app.request.get('dispo') == '0' ? 'active' : '' }}">
+          Indisponible
+        </a>
+      </div>
+    </form>
+  </div>
+
+  {# ── GRILLE DE LIVRES ── #}
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">
+        Tous les <span>livres</span>
+        <small style="font-size:1rem; color:var(--dust); font-family:'DM Sans',sans-serif;">
+          ({{ livres|length }})
+        </small>
+      </h2>
+      {% if app.user %}
+        <a href="{{ path('livre_new') }}" class="btn-primary"
+           style="text-decoration:none; padding:.5rem 1.2rem; border-radius:2px;">
+          + Ajouter un livre
+        </a>
+      {% endif %}
+    </div>
+
+    {% if livres is empty %}
+
+      <div style="text-align:center; padding:5rem 0; color:var(--sepia);">
+        <div style="font-size:3.5rem; margin-bottom:1rem;">📭</div>
+        <p style="font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:.5rem;">
+          Aucun livre trouvé.
+        </p>
+        <p style="color:var(--dust); margin-bottom:1.5rem;">
+          La bibliothèque est vide ou aucun résultat ne correspond à votre recherche.
+        </p>
+        <a href="{{ path('livre_new') }}" class="btn-primary"
+           style="display:inline-block; padding:.7rem 1.8rem; text-decoration:none; border-radius:2px;">
+          Ajouter le premier livre
+        </a>
+      </div>
+
+    {% else %}
+
+      <div class="books-grid">
+        {% set colors = ['#8b3a3a','#2e5a4e','#4a3870','#c07830','#1a3a5c','#6a3020','#3a5c3a','#5c3a5c'] %}
+
+        {% for livre in livres %}
+          {% set bgColor = colors[loop.index0 % colors|length] %}
+
+          <div class="book-card">
+
+            {# ── Couverture ── #}
+
+            <div class="book-card-cover" style="--cover-bg: {{ bgColor }};">
+
+              {# Badge disponibilité #}
+              {% if livre.disponible %}
+                <span class="badge new">Disponible</span>
+              {% else %}
+                <span class="badge pop">Indisponible</span>
+              {% endif %}
+
+              {# Image si elle existe, sinon titre #}
+              {% if livre.imageName %}
+                <img src="{{ asset('uploads/' ~ livre.imageName) }}"
+                     alt="{{ livre.titre }}"
+                     style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;"/>
+              {% endif %}
+
+              <span style="position:relative; z-index:1; text-shadow:0 1px 4px rgba(0,0,0,.4);">
+                {{ livre.titre }}
+              </span>
+            </div>
+
+            {# ── Infos ── #}
+            <div class="book-card-body">
+
+              {# Genre (relation Genre) #}
+              <div class="book-card-genre">
+                {{ livre.genre ? livre.genre.nom : 'Non classé' }}
+              </div>
+
+              {# Titre #}
+              <div class="book-card-title">{{ livre.titre }}</div>
+
+              {# Auteur (relation Auteur) #}
+              <div class="book-card-author">
+                {{ livre.auteur ? livre.auteur.nom : 'Auteur inconnu' }}
+              </div>
+
+              <div class="book-card-footer">
+                <div>
+                  {# Date de publication #}
+                  <div style="font-size:.75rem; color:var(--sepia);">
+                    📅 {{ livre.datePublication ? livre.datePublication|date('Y') : '' }}
+                  </div>
+                  {# Nombre de pages #}
+                  <div class="rating-count">
+                    {{ livre.nbPages }} pages
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:.4rem;">
+                  <a href="{{ path('livre_show', {id: livre.id}) }}"
+                     class="add-btn">Voir</a>
+                  {% if app.user %}
+                    <a href="{{ path('livre_edit', {id: livre.id}) }}"
+                       class="add-btn" style="background:var(--sepia);">✏️</a>
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% endif %}
+  </section>
+
 {% endblock %}

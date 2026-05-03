@@ -1,13 +1,3 @@
-body {
-    background-color: skyblue;
-}
-
-.book-card-cover {
-  background: var(--cover-bg, #2e5a4e);
-  color: #fff;
-}
-
-
  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {

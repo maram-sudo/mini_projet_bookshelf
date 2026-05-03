@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ livre.titre }}{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-3">
+        {% if livre.imageName %}
+            <img src="{{ asset('uploads/livres/' ~ livre.imageName) }}" 
+                 class="img-fluid rounded shadow">
+        {% else %}
+            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" 
+                 style="height: 300px; font-size: 4rem;">📖</div>
+        {% endif %}
+    </div>
+    <div class="col-md-9">
+        <h1>{{ livre.titre }}</h1>
+        <p class="text-muted">
+            Par <strong>{{ livre.auteur.prenom }} {{ livre.auteur.nom }}</strong>
+        </p>
+        <span class="badge mb-3" style="background-color: {{ livre.genre.couleur }}; font-size: 1rem;">
+            {{ livre.genre.nom }}
+        </span>
+        <p>{{ livre.resume }}</p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>ISBN :</strong> {{ livre.isbn }}</li>
+            <li class="list-group-item"><strong>Pages :</strong> {{ livre.nbPages }}</li>
+            <li class="list-group-item"><strong>Publication :</strong> {{ livre.datePublication|date('d/m/Y') }}</li>
+            <li class="list-group-item">
+                <strong>Disponibilité :</strong>
+                {% if livre.disponible %}
+                    <span class="badge bg-success">🟢 Disponible</span>
+                {% else %}
+                    <span class="badge bg-danger">🔴 Indisponible</span>
+                {% endif %}
+            </li>
+        </ul>
+        <div class="mb-3">
+            <strong>Tags :</strong>
+            {% for tag in livre.tags %}
+                <span class="badge" style="background-color: {{ tag.couleur }}">{{ tag.nom }}</span>
+            {% endfor %}
+        </div>
+
+        <a href="{{ path('ma_liste_add', {id: livre.id}) }}" class="btn btn-outline-primary">
+            📖 Ajouter à ma liste
+        </a>
+        <a href="{{ path('livre_index') }}" class="btn btn-secondary">← Retour</a>
+    </div>
+</div>
+{% endblock %}

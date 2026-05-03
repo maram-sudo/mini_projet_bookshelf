@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau livre{% endblock %}
+{% block body %}
+<h1>Ajouter un livre</h1>
+{{ form_start(form) }}
+{{ form_row(form.titre) }}
+{{ form_row(form.resume) }}
+{{ form_row(form.isbn) }}
+{{ form_row(form.nbPages) }}
+{{ form_row(form.datePublication) }}
+{{ form_row(form.disponible) }}
+{{ form_row(form.auteur) }}
+{{ form_row(form.genre) }}
+<div class="mb-3">
+    <label class="form-label"><strong>Tags :</strong></label>
+    {{ form_widget(form.tags) }}
+</div>
+{{ form_row(form.imageFile) }}
+{{ form_row(form.submit) }}
+{{ form_end(form) }}
+{% endblock %}

@@ -1,24 +1,58 @@
+{# templates/base.html.twig #}
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}BookShelf{% endblock %} — Bibliothèque en Ligne</title>
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 
-        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+ <link rel="stylesheet" href="{{ asset('css/bookshelf.css') }}"/>
+</head>
+<body>
+
+  {# ── NAVBAR ── #}
+  <nav>
+    <div class="nav-logo">
+      <span class="logo-icon">📚</span>
+      <a href="{{ path('livre_index') }}">Book<span>Shelf</span></a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ path('livre_index') }}">Catalogue</a></li>
+      <li><a href="{{ path('livre_new') }}">Ajouter un livre</a></li>
+    </ul>
+    <div class="nav-actions">
+      {% if app.user %}
+        <span style="color:var(--dust)">👤 {{ app.user.email }}</span>
+        <a href="{{ path('app_logout') }}" class="btn-ghost">Déconnexion</a>
+      {% else %}
+        <a href="{{ path('app_login') }}" class="btn-ghost">Connexion</a>
+        <a href="{{ path('app_register') }}" class="btn-primary">S'inscrire</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  {# ── FLASH MESSAGES ── #}
+  {% for message in app.flashes('success') %}
+    <div style="background:var(--sage);color:#fff;padding:.8rem 2rem;">✓ {{ message }}</div>
+  {% endfor %}
+  {% for message in app.flashes('error') %}
+    <div style="background:var(--rust);color:#fff;padding:.8rem 2rem;">✗ {{ message }}</div>
+  {% endfor %}
+
+  {# ── CONTENU PRINCIPAL ── #}
+  {% block body %}{% endblock %}
+
+  {# ── FOOTER ── #}
+  <footer>
+    <div class="footer-bottom">
+      <p>© {{ "now"|date("Y") }} BookShelf · Tous droits réservés</p>
+    </div>
+  </footer>
+
+
+  {% block javascripts %}{% endblock %}
+
+</body>
 </html>
